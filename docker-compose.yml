@@ -1,0 +1,34 @@
+version: '3.4'
+
+services:
+  
+  mysqldb:
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - data:/data/mysqldb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: fwemysqldb
+    ports:
+      - 3306:3306
+
+  fwedocker:
+    image: fwedocker
+    volumes:
+      - .:/usr/src/app
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - 80:80
+    links:
+      - mysqldb
+    environment:
+      WAIT_HOSTS: mysqldb:3306
+  
+volumes:
+  data:
